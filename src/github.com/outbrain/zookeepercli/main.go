@@ -20,14 +20,15 @@ import (
 	"flag"
 	"strings"
 	"github.com/outbrain/log"
+	"github.com/outbrain/zookeepercli/output"
 	"github.com/outbrain/zookeepercli/zk"
 )
 
-// main is the application's entry point. It will either spawn a CLI or HTTP itnerfaces.
+// main is the application's entry point.
 func main() {
 	servers := flag.String("servers", "", "srv1[:port1][,srv2[:port2]...]")
-	command := flag.String("c", "", "command (get|ls)")
-	//format := flag.String("f", "txt", "output format (txt|json)")
+	command := flag.String("c", "", "command (get|ls|create|set|delete)")
+	format := flag.String("format", "txt", "output format (txt|json)")
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
 	stack := flag.Bool("stack", false, "add stack trace upon error")
@@ -58,18 +59,55 @@ func main() {
 		log.Fatal("Expected command (-c) (get|ls)")
 	}
 	
-	if len(flag.Args()) == 0 {
+	if len(flag.Args()) < 1 {
 		log.Fatal("Expected path argument")
 	}
 	path := flag.Arg(0)
+	if strings.HasSuffix(path, "/") {
+		log.Fatal("Path must not end with '/'")
+	} 
 	
 	zk.SetServers(serversArray)
 
 	switch *command {
 		case "get": {
-			result, err := zk.Get(path)
+			if result, err := zk.Get(path); err == nil {
+				output.PrintString(result, *format)
+			} else {
+				 log.Fatale(err) 
+			}
 		}
 		case "ls": {
+			if result, err := zk.Children(path); err == nil {
+				output.PrintStringArray(result, *format)
+			} else {
+				 log.Fatale(err) 
+			}
+		}
+		case "create": {
+			if len(flag.Args()) < 2 {
+				log.Fatal("Expected data argument")
+			}
+			if result, err := zk.Create(path, []byte(flag.Arg(1))); err == nil {
+				log.Info("Created %+v", result)
+			} else {
+				 log.Fatale(err) 
+			}
+		}
+		case "set": {
+			if len(flag.Args()) < 2 {
+				log.Fatal("Expected data argument")
+			}
+			if result, err := zk.Set(path, []byte(flag.Arg(1))); err == nil {
+				log.Info("Set %+v", result)
+			} else {
+				 log.Fatale(err) 
+			}
+		}
+		case "delete": {
+			if err := zk.Delete(path); err != nil {
+				 log.Fatale(err) 
+			}
 		}
 		default: log.Fatalf("Unknown command: %s", *command) 
 	}
