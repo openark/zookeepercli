@@ -7,7 +7,9 @@ Simple, lightweight, dependable CLI for ZooKeeper
 
  * Basic CRUD-like operations: Create, Set, Delete, Get, Children.
  * Well formatted and controlled output: supporting either `txt` or `json` format
- * Single, no-dependencies binary, based on pure implementation of ZooKeeper protocol in go by [github.com/samuel/go-zookeeper/zk](http://github.com/samuel/go-zookeeper/zk)
+ * Single, no-dependencies binary file, based on a native Go ZooKeeper library by [github.com/samuel/go-zookeeper/zk](http://github.com/samuel/go-zookeeper)
+ 
+ 
  
  
 
