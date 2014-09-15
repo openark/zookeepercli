@@ -27,7 +27,7 @@ import (
 // main is the application's entry point.
 func main() {
 	servers := flag.String("servers", "", "srv1[:port1][,srv2[:port2]...]")
-	command := flag.String("c", "", "command (get|ls|create|set|delete)")
+	command := flag.String("c", "", "command (get|ls|lsr|create|set|delete)")
 	format := flag.String("format", "txt", "output format (txt|json)")
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
@@ -56,7 +56,7 @@ func main() {
 	}
 
 	if len(*command) == 0 {
-		log.Fatal("Expected command (-c) (get|ls|create|set|delete)")
+		log.Fatal("Expected command (-c) (get|ls|lsr|create|set|delete)")
 	}
 
 	if len(flag.Args()) < 1 {
@@ -81,6 +81,14 @@ func main() {
 	case "ls":
 		{
 			if result, err := zk.Children(path); err == nil {
+				output.PrintStringArray(result, *format)
+			} else {
+				log.Fatale(err)
+			}
+		}
+	case "lsr":
+		{
+			if result, err := zk.ChildrenRecursive(path, ""); err == nil {
 				output.PrintStringArray(result, *format)
 			} else {
 				log.Fatale(err)

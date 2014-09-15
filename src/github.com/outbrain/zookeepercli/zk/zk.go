@@ -17,7 +17,9 @@
 package zk
 
 import (
+	"github.com/outbrain/log"
 	"github.com/samuel/go-zookeeper/zk"
+	gopath "path"
 	"time"
 )
 
@@ -55,6 +57,25 @@ func Children(path string) ([]string, error) {
 
 	children, _, err := connection.Children(path)
 	return children, err
+}
+
+func ChildrenRecursive(path string, incrementalPath string) ([]string, error) {
+	children, err := Children(path)
+	if err != nil {
+		return children, err
+	}
+	recursiveChildren := []string{}
+	for _, child := range children {
+		incrementalChild := gopath.Join(incrementalPath, child)
+		recursiveChildren = append(recursiveChildren, incrementalChild)
+		log.Debugf("incremental child: %+v", incrementalChild)
+		incrementalChildren, err := ChildrenRecursive(gopath.Join(path, child), incrementalChild)
+		if err != nil {
+			return children, err
+		}
+		recursiveChildren = append(recursiveChildren, incrementalChildren...)
+	}
+	return recursiveChildren, err
 }
 
 func Create(path string, data []byte) (string, error) {
