@@ -9,6 +9,15 @@ Simple, lightweight, dependable CLI for ZooKeeper
  * Well formatted and controlled output: supporting either `txt` or `json` format
  * Single, no-dependencies binary file, based on a native Go ZooKeeper library by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper)
 
+### Download & Install
+
+There are [pre built binaries](https://github.com/outbrain/zookeepercli/releases) for download.
+You can find `RPM` and `deb` packages, as well as pre-compiled, dependency free `zookeepercli` executable binary.
+In fact, the only file installed by the pre-built `RPM` and `deb` packages is said executable binary file. 
+
+Otherwise the source code is freely available; you will need `git` installed as well as `go`, and you're on you own.
+
+  
 ### Usage:
 
     $ zookeepercli --help
