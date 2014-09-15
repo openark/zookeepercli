@@ -17,73 +17,72 @@
 package zk
 
 import (
-	"time"
 	"github.com/samuel/go-zookeeper/zk"
+	"time"
 )
 
-
 var servers []string
-
 
 var flags int32 = int32(0)
 var acl []zk.ACL = zk.WorldACL(zk.PermAll)
 
-
-
 func SetServers(serversArray []string) {
 	servers = serversArray
 }
-
 
 func connect() (*zk.Conn, error) {
 	conn, _, err := zk.Connect(servers, time.Second)
 	return conn, err
 }
 
-
 func Get(path string) ([]byte, error) {
 	connection, err := connect()
-	if err != nil { return []byte{}, err }
+	if err != nil {
+		return []byte{}, err
+	}
 	defer connection.Close()
-	
+
 	data, _, err := connection.Get(path)
 	return data, err
 }
 
-
-
 func Children(path string) ([]string, error) {
 	connection, err := connect()
-	if err != nil { return []string{}, err }
+	if err != nil {
+		return []string{}, err
+	}
 	defer connection.Close()
-	
+
 	children, _, err := connection.Children(path)
 	return children, err
 }
 
-
 func Create(path string, data []byte) (string, error) {
 	connection, err := connect()
-	if err != nil { return "", err }
+	if err != nil {
+		return "", err
+	}
 	defer connection.Close()
-	
+
 	return connection.Create(path, data, flags, acl)
 }
 
-
 func Set(path string, data []byte) (*zk.Stat, error) {
 	connection, err := connect()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer connection.Close()
-	
+
 	return connection.Set(path, data, 0)
 }
 
-
-func Delete(path string) (error) {
+func Delete(path string) error {
 	connection, err := connect()
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	defer connection.Close()
-	
+
 	return connection.Delete(path, -1)
 }

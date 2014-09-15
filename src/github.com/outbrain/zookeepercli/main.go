@@ -14,14 +14,14 @@
    limitations under the License.
 */
 
-package main 
+package main
 
 import (
 	"flag"
-	"strings"
 	"github.com/outbrain/log"
 	"github.com/outbrain/zookeepercli/output"
 	"github.com/outbrain/zookeepercli/zk"
+	"strings"
 )
 
 // main is the application's entry point.
@@ -32,8 +32,8 @@ func main() {
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
 	stack := flag.Bool("stack", false, "add stack trace upon error")
-	flag.Parse();
-	
+	flag.Parse()
+
 	log.SetLevel(log.ERROR)
 	if *verbose {
 		log.SetLevel(log.INFO)
@@ -58,57 +58,63 @@ func main() {
 	if len(*command) == 0 {
 		log.Fatal("Expected command (-c) (get|ls|create|set|delete)")
 	}
-	
+
 	if len(flag.Args()) < 1 {
 		log.Fatal("Expected path argument")
 	}
 	path := flag.Arg(0)
 	if strings.HasSuffix(path, "/") {
 		log.Fatal("Path must not end with '/'")
-	} 
-	
+	}
+
 	zk.SetServers(serversArray)
 
 	switch *command {
-		case "get": {
+	case "get":
+		{
 			if result, err := zk.Get(path); err == nil {
 				output.PrintString(result, *format)
 			} else {
-				 log.Fatale(err) 
+				log.Fatale(err)
 			}
 		}
-		case "ls": {
+	case "ls":
+		{
 			if result, err := zk.Children(path); err == nil {
 				output.PrintStringArray(result, *format)
 			} else {
-				 log.Fatale(err) 
+				log.Fatale(err)
 			}
 		}
-		case "create": {
+	case "create":
+		{
 			if len(flag.Args()) < 2 {
 				log.Fatal("Expected data argument")
 			}
 			if result, err := zk.Create(path, []byte(flag.Arg(1))); err == nil {
 				log.Info("Created %+v", result)
 			} else {
-				 log.Fatale(err) 
+				log.Fatale(err)
 			}
 		}
-		case "set": {
+	case "set":
+		{
 			if len(flag.Args()) < 2 {
 				log.Fatal("Expected data argument")
 			}
 			if result, err := zk.Set(path, []byte(flag.Arg(1))); err == nil {
 				log.Info("Set %+v", result)
 			} else {
-				 log.Fatale(err) 
+				log.Fatale(err)
 			}
 		}
-		case "delete": {
+	case "delete":
+		{
 			if err := zk.Delete(path); err != nil {
-				 log.Fatale(err) 
+				log.Fatale(err)
 			}
 		}
-		default: log.Fatalf("Unknown command: %s", *command) 
+	default:
+		log.Fatalf("Unknown command: %s", *command)
 	}
 }
