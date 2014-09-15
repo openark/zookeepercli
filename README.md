@@ -9,7 +9,19 @@ Simple, lightweight, dependable CLI for ZooKeeper
  * Well formatted and controlled output: supporting either `txt` or `json` format
  * Single, no-dependencies binary file, based on a native Go ZooKeeper library by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper)
 
-Usage samples:
+Usage:
+
+    $ zookeepercli --help
+    Usage of zookeepercli:
+      -c="": command (get|ls|create|set|delete)
+      -debug=false: debug mode (very verbose)
+      -format="txt": output format (txt|json)
+      -servers="": srv1[:port1][,srv2[:port2]...]
+      -stack=false: add stack trace upon error
+      -verbose=false: verbose
+    
+
+Examples:
 
     
     
