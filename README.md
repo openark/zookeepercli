@@ -9,7 +9,7 @@ Simple, lightweight, dependable CLI for ZooKeeper
  * Well formatted and controlled output: supporting either `txt` or `json` format
  * Single, no-dependencies binary file, based on a native Go ZooKeeper library by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper)
 
-Usage:
+### Usage:
 
     $ zookeepercli --help
     Usage of zookeepercli:
@@ -21,8 +21,7 @@ Usage:
       -verbose=false: verbose
     
 
-Examples:
-
+### Examples:
     
     
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c create /demo_only some_value
@@ -33,6 +32,7 @@ Examples:
     $ zookeepercli --servers srv-1,srv-2,srv-3 --format=txt -c get /demo_only
     some_value
     
+    # Same as above, JSON format output:
     $ zookeepercli --servers srv-1,srv-2,srv-3 --format=json -c get /demo_only
     "some_value"
     
@@ -57,6 +57,7 @@ Examples:
     key1
     
     
+    # Same as above, JSON format output:
     $ zookeepercli --servers srv-1,srv-2,srv-3 --format=json -c ls /demo_only
     ["key3","key2","key1"]
     
@@ -69,10 +70,14 @@ Examples:
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c delete /demo_only/key3
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c delete /demo_only
     
-
  
 The only existing solution known to the author provides output in uncontrolled, not-well-formed, inconsistent format, and is relatively heavyweight to invoke.
 
+### License
+
+Release under the [Apache 2.0 license](https://github.com/outbrain/zookeepercli/blob/master/LICENSE)
+
+Authored by [Shlomi Noach](https://github.com/shlomi-noach) at [Outbrain](https://github.com/outbrain)
  
  
  
