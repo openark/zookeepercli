@@ -21,6 +21,7 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 	gopath "path"
 	"time"
+	"sort"
 )
 
 var servers []string
@@ -59,17 +60,19 @@ func Children(path string) ([]string, error) {
 	return children, err
 }
 
-func ChildrenRecursive(path string, incrementalPath string) ([]string, error) {
-	children, err := Children(path)
+
+func childrenRecursiveInternal(connection *zk.Conn, path string, incrementalPath string) ([]string, error) {
+	children, _, err := connection.Children(path)
 	if err != nil {
 		return children, err
 	}
+	sort.Sort(sort.StringSlice(children))
 	recursiveChildren := []string{}
 	for _, child := range children {
 		incrementalChild := gopath.Join(incrementalPath, child)
 		recursiveChildren = append(recursiveChildren, incrementalChild)
 		log.Debugf("incremental child: %+v", incrementalChild)
-		incrementalChildren, err := ChildrenRecursive(gopath.Join(path, child), incrementalChild)
+		incrementalChildren, err := childrenRecursiveInternal(connection, gopath.Join(path, child), incrementalChild)
 		if err != nil {
 			return children, err
 		}
@@ -77,6 +80,19 @@ func ChildrenRecursive(path string, incrementalPath string) ([]string, error) {
 	}
 	return recursiveChildren, err
 }
+
+
+func ChildrenRecursive(path string) ([]string, error) {
+	connection, err := connect()
+	if err != nil {
+		return []string{}, err
+	}
+	defer connection.Close()
+
+	result, err := childrenR(connection, path, "")
+	return result, err
+}
+
 
 func Create(path string, data []byte) (string, error) {
 	connection, err := connect()

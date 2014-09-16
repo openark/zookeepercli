@@ -88,7 +88,7 @@ func main() {
 		}
 	case "lsr":
 		{
-			if result, err := zk.ChildrenRecursive(path, ""); err == nil {
+			if result, err := zk.ChildrenRecursive(path); err == nil {
 				output.PrintStringArray(result, *format)
 			} else {
 				log.Fatale(err)
