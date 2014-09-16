@@ -6,7 +6,7 @@ Simple, lightweight, dependable CLI for ZooKeeper
 **zookeepercli** is a non-interactive command line client for [ZooKeeper](http://zookeeper.apache.org/). It provides with:
 
  * Basic CRUD-like operations: `create`, `set`, `delete`, `get`, `ls` (aka `children`).
- * Extended operations: `lsr` (ls recursive) 
+ * Extended operations: `lsr` (ls recursive), `creater` (create recursively)
  * Well formatted and controlled output: supporting either `txt` or `json` format
  * Single, no-dependencies binary file, based on a native Go ZooKeeper library by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper)
 
@@ -79,6 +79,25 @@ Otherwise the source code is freely available; you will need `git` installed as 
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c delete /demo_only/key2
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c delete /demo_only/key3
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c delete /demo_only
+
+    # /demo_only path now does not exist.
+    
+    # Create recursively a path:
+    $ zookeepercli --servers=srv-1,srv-2,srv-3 -c creater "/demo_only/child/key1" "val1"
+    $ zookeepercli --servers=srv-1,srv-2,srv-3 -c creater "/demo_only/child/key2" "val2"
+
+    $ zookeepercli --servers=srv-1,srv-2,srv-3 -c get "/demo_only/child/key1"
+    val1
+
+    # This path was auto generated due to recursive create:
+    $ zookeepercli --servers=srv-1,srv-2,srv-3 -c get "/demo_only" 
+    zookeepercli auto-generated
+    
+    # ls recursively a path and all sub children:
+    $ zookeepercli --servers=srv-1,srv-2,srv-3 -c lsr "/demo_only" 
+    child
+    child/key1
+    child/key2
     
  
 The only existing solution known to the author provides output in uncontrolled, not-well-formed, inconsistent format, and is relatively heavyweight to invoke.
