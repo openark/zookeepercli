@@ -20,8 +20,8 @@ import (
 	"github.com/outbrain/log"
 	"github.com/samuel/go-zookeeper/zk"
 	gopath "path"
-	"time"
 	"sort"
+	"time"
 )
 
 var servers []string
@@ -36,6 +36,17 @@ func SetServers(serversArray []string) {
 func connect() (*zk.Conn, error) {
 	conn, _, err := zk.Connect(servers, time.Second)
 	return conn, err
+}
+
+func Exists(path string) (bool, error) {
+	connection, err := connect()
+	if err != nil {
+		return false, err
+	}
+	defer connection.Close()
+
+	exists, _, err := connection.Exists(path)
+	return exists, err
 }
 
 func Get(path string) ([]byte, error) {
@@ -60,7 +71,6 @@ func Children(path string) ([]string, error) {
 	return children, err
 }
 
-
 func childrenRecursiveInternal(connection *zk.Conn, path string, incrementalPath string) ([]string, error) {
 	children, _, err := connection.Children(path)
 	if err != nil {
@@ -81,7 +91,6 @@ func childrenRecursiveInternal(connection *zk.Conn, path string, incrementalPath
 	return recursiveChildren, err
 }
 
-
 func ChildrenRecursive(path string) ([]string, error) {
 	connection, err := connect()
 	if err != nil {
@@ -89,19 +98,37 @@ func ChildrenRecursive(path string) ([]string, error) {
 	}
 	defer connection.Close()
 
-	result, err := childrenR(connection, path, "")
+	result, err := childrenRecursiveInternal(connection, path, "")
 	return result, err
 }
 
+func createInternal(connection *zk.Conn, path string, data []byte, force bool) (string, error) {
+	if path == "/" {
+		return "/", nil
+	}
+	log.Debugf("creating: %s", path)
+	attempts := 0
+	for {
+		attempts += 1
+		returnValue, err := connection.Create(path, data, flags, acl)
+		log.Debugf("create status for %s: %s, %+v", path, returnValue, err)
+		if err != nil && force && attempts < 2 {
+			returnValue, err = createInternal(connection, gopath.Dir(path), []byte("zookeepercli auto-generated"), force)
+		} else {
+			return returnValue, err
+		}
+	}
+	return "", nil
+}
 
-func Create(path string, data []byte) (string, error) {
+func Create(path string, data []byte, force bool) (string, error) {
 	connection, err := connect()
 	if err != nil {
 		return "", err
 	}
 	defer connection.Close()
 
-	return connection.Create(path, data, flags, acl)
+	return createInternal(connection, path, data, force)
 }
 
 func Set(path string, data []byte) (*zk.Stat, error) {

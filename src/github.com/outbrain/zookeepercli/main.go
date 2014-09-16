@@ -27,7 +27,8 @@ import (
 // main is the application's entry point.
 func main() {
 	servers := flag.String("servers", "", "srv1[:port1][,srv2[:port2]...]")
-	command := flag.String("c", "", "command (get|ls|lsr|create|set|delete)")
+	command := flag.String("c", "", "command (exists|get|ls|lsr|create|set|delete)")
+	force := flag.Bool("force", false, "force operation")
 	format := flag.String("format", "txt", "output format (txt|json)")
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
@@ -56,7 +57,7 @@ func main() {
 	}
 
 	if len(*command) == 0 {
-		log.Fatal("Expected command (-c) (get|ls|lsr|create|set|delete)")
+		log.Fatal("Expected command (-c) (exists|get|ls|lsr|create|set|delete)")
 	}
 
 	if len(flag.Args()) < 1 {
@@ -70,6 +71,14 @@ func main() {
 	zk.SetServers(serversArray)
 
 	switch *command {
+	case "exists":
+		{
+			if exists, err := zk.Exists(path); err == nil && exists {
+				output.PrintString([]byte("true"), *format)
+			} else {
+				log.Fatale(err)
+			}
+		}
 	case "get":
 		{
 			if result, err := zk.Get(path); err == nil {
@@ -99,8 +108,8 @@ func main() {
 			if len(flag.Args()) < 2 {
 				log.Fatal("Expected data argument")
 			}
-			if result, err := zk.Create(path, []byte(flag.Arg(1))); err == nil {
-				log.Info("Created %+v", result)
+			if result, err := zk.Create(path, []byte(flag.Arg(1)), *force); err == nil {
+				log.Infof("Created %+v", result)
 			} else {
 				log.Fatale(err)
 			}
@@ -111,7 +120,7 @@ func main() {
 				log.Fatal("Expected data argument")
 			}
 			if result, err := zk.Set(path, []byte(flag.Arg(1))); err == nil {
-				log.Info("Set %+v", result)
+				log.Infof("Set %+v", result)
 			} else {
 				log.Fatale(err)
 			}
