@@ -90,6 +90,8 @@ Otherwise the source code is freely available; you will need `git` installed as 
     # Create recursively a path:
     $ zookeepercli --servers=srv-1,srv-2,srv-3 -c creater "/demo_only/child/key1" "val1"
     $ zookeepercli --servers=srv-1,srv-2,srv-3 -c creater "/demo_only/child/key2" "val2"
+    
+    # "-c creater" is same as "-c create --force"
 
     $ zookeepercli --servers=srv-1,srv-2,srv-3 -c get "/demo_only/child/key1"
     val1
