@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+// output provides with controlled printing functions
 package output
 
 import (
@@ -22,6 +23,7 @@ import (
 	"strings"
 )
 
+// PrintString prints a single string to standard output, in either plaintext format or JSON format
 func PrintString(data []byte, formatType string) {
 
 	switch formatType {
@@ -37,6 +39,7 @@ func PrintString(data []byte, formatType string) {
 	}
 }
 
+// PrintString prints a string array to standard output, in either plaintext format (one string per row) or JSON format
 func PrintStringArray(stringArray []string, formatType string) {
 
 	switch formatType {

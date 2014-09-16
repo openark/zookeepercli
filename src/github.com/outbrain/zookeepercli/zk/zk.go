@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+// zk provides with higher level commands over the lower level zookeeper connector
 package zk
 
 import (
@@ -26,18 +27,25 @@ import (
 
 var servers []string
 
+// We assume complete access to all
 var flags int32 = int32(0)
 var acl []zk.ACL = zk.WorldACL(zk.PermAll)
 
+// SetServers sets the list of servers for the zookeeper client to connect to.
+// Each element in the array should be in either of following forms:
+// - "servername"
+// - "servername:port"
 func SetServers(serversArray []string) {
 	servers = serversArray
 }
 
+// connect
 func connect() (*zk.Conn, error) {
 	conn, _, err := zk.Connect(servers, time.Second)
 	return conn, err
 }
 
+// Exists returns true when the given path exists
 func Exists(path string) (bool, error) {
 	connection, err := connect()
 	if err != nil {
@@ -49,6 +57,7 @@ func Exists(path string) (bool, error) {
 	return exists, err
 }
 
+// Get returns value associated with given path, or error if path does not exist
 func Get(path string) ([]byte, error) {
 	connection, err := connect()
 	if err != nil {
@@ -60,6 +69,7 @@ func Get(path string) ([]byte, error) {
 	return data, err
 }
 
+// Children returns sub-paths of given path, optionally empty array, or error if path does not exist
 func Children(path string) ([]string, error) {
 	connection, err := connect()
 	if err != nil {
@@ -71,6 +81,7 @@ func Children(path string) ([]string, error) {
 	return children, err
 }
 
+// childrenRecursiveInternal: internal implementation of recursive-children query.
 func childrenRecursiveInternal(connection *zk.Conn, path string, incrementalPath string) ([]string, error) {
 	children, _, err := connection.Children(path)
 	if err != nil {
@@ -91,6 +102,9 @@ func childrenRecursiveInternal(connection *zk.Conn, path string, incrementalPath
 	return recursiveChildren, err
 }
 
+// ChildrenRecursive returns list of all descendants of given path (optionally empty), or error if the path
+// does not exist.
+// Every element in result list is a relative subpath for the given path.
 func ChildrenRecursive(path string) ([]string, error) {
 	connection, err := connect()
 	if err != nil {
@@ -102,6 +116,7 @@ func ChildrenRecursive(path string) ([]string, error) {
 	return result, err
 }
 
+// createInternal: create a new path
 func createInternal(connection *zk.Conn, path string, data []byte, force bool) (string, error) {
 	if path == "/" {
 		return "/", nil
@@ -121,6 +136,10 @@ func createInternal(connection *zk.Conn, path string, data []byte, force bool) (
 	return "", nil
 }
 
+// Create will create a new path, or exit with error should the path exist.
+// The "force" param controls the behavior when path's parent directory does not exist.
+// When "force" is false, the function returns with error/ When "force" is true, it recursively
+// attempts to create required parent directories.
 func Create(path string, data []byte, force bool) (string, error) {
 	connection, err := connect()
 	if err != nil {
@@ -131,6 +150,7 @@ func Create(path string, data []byte, force bool) (string, error) {
 	return createInternal(connection, path, data, force)
 }
 
+// Set updates a value for a given path, or returns with error if the path does not exist
 func Set(path string, data []byte) (*zk.Stat, error) {
 	connection, err := connect()
 	if err != nil {
@@ -141,6 +161,7 @@ func Set(path string, data []byte) (*zk.Stat, error) {
 	return connection.Set(path, data, 0)
 }
 
+// Delete removes a path entry. It exits with error if the path does not exist, or has subdirectories.
 func Delete(path string) error {
 	connection, err := connect()
 	if err != nil {

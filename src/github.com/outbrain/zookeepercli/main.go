@@ -27,7 +27,7 @@ import (
 // main is the application's entry point.
 func main() {
 	servers := flag.String("servers", "", "srv1[:port1][,srv2[:port2]...]")
-	command := flag.String("c", "", "command (exists|get|ls|lsr|create|set|delete)")
+	command := flag.String("c", "", "command, required (exists|get|ls|lsr|create|creater|set|delete)")
 	force := flag.Bool("force", false, "force operation")
 	format := flag.String("format", "txt", "output format (txt|json)")
 	verbose := flag.Bool("verbose", false, "verbose")
@@ -57,7 +57,7 @@ func main() {
 	}
 
 	if len(*command) == 0 {
-		log.Fatal("Expected command (-c) (exists|get|ls|lsr|create|set|delete)")
+		log.Fatal("Expected command (-c) (exists|get|ls|lsr|create|creater|set|delete)")
 	}
 
 	if len(flag.Args()) < 1 {
@@ -70,6 +70,10 @@ func main() {
 
 	zk.SetServers(serversArray)
 
+	if *command == "creater" {
+		*command = "create"
+		*force = true
+	}
 	switch *command {
 	case "exists":
 		{
