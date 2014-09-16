@@ -71,11 +71,9 @@ Otherwise the source code is freely available; you will need `git` installed as 
     key2
     key1
     
-    
     # Same as above, JSON format output:
     $ zookeepercli --servers srv-1,srv-2,srv-3 --format=json -c ls /demo_only
     ["key3","key2","key1"]
-    
     
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c delete /demo_only
     2014-09-15 08:26:31 FATAL zk: node has children
