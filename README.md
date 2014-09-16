@@ -104,8 +104,12 @@ Otherwise the source code is freely available; you will need `git` installed as 
     child/key1
     child/key2
     
- 
-The only existing solution known to the author provides output in uncontrolled, not-well-formed, inconsistent format, and is relatively heavyweight to invoke.
+
+The tool was built in order to allow with shell scripting seamless integration with ZooKeeper. 
+There is another, official command line tool for ZooKeeper that the author found inadequate 
+in terms of output format and output control, as well as large footprint. 
+**zookeepercli** overcomes those limitations and provides with quick, well formatted output as well as
+enhanced functionality. 
 
 ### License
 
