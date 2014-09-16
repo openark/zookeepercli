@@ -22,7 +22,7 @@ Otherwise the source code is freely available; you will need `git` installed as 
 ### Usage:
 
     $ zookeepercli --help
-    Usage of /tmp/zookeepercli/zookeepercli:
+    Usage of zookeepercli:
       -c="": command (exists|get|ls|lsr|create|creater|set|delete)
       -debug=false: debug mode (very verbose)
       -force=false: force operation
