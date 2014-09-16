@@ -5,7 +5,7 @@ Simple, lightweight, dependable CLI for ZooKeeper
 
 **zookeepercli** is a non-interactive command line client for [ZooKeeper](http://zookeeper.apache.org/). It provides with:
 
- * Basic CRUD-like operations: `create`, `set`, `delete`, `get`, `ls` (aka `children`).
+ * Basic CRUD-like operations: `create`, `set`, `delete`, `exists`, `get`, `ls` (aka `children`).
  * Extended operations: `lsr` (ls recursive), `creater` (create recursively)
  * Well formatted and controlled output: supporting either `txt` or `json` format
  * Single, no-dependencies binary file, based on a native Go ZooKeeper library by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper)
@@ -22,9 +22,10 @@ Otherwise the source code is freely available; you will need `git` installed as 
 ### Usage:
 
     $ zookeepercli --help
-    Usage of zookeepercli:
-      -c="": command (get|ls|create|set|delete)
+    Usage of /tmp/zookeepercli/zookeepercli:
+      -c="": command (exists|get|ls|lsr|create|creater|set|delete)
       -debug=false: debug mode (very verbose)
+      -force=false: force operation
       -format="txt": output format (txt|json)
       -servers="": srv1[:port1][,srv2[:port2]...]
       -stack=false: add stack trace upon error
@@ -45,6 +46,10 @@ Otherwise the source code is freely available; you will need `git` installed as 
     # Same as above, JSON format output:
     $ zookeepercli --servers srv-1,srv-2,srv-3 --format=json -c get /demo_only
     "some_value"
+    
+    # exists exits with exit code 0 when path exists, 1 when path does not exist 
+    $ zookeepercli --servers srv-1,srv-2,srv-3 -c exists /demo_only
+    true
     
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c set /demo_only another_value
     
