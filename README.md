@@ -8,7 +8,8 @@ Simple, lightweight, dependable CLI for ZooKeeper
  * Basic CRUD-like operations: `create`, `set`, `delete`, `exists`, `get`, `ls` (aka `children`).
  * Extended operations: `lsr` (ls recursive), `creater` (create recursively)
  * Well formatted and controlled output: supporting either `txt` or `json` format
- * Single, no-dependencies binary file, based on a native Go ZooKeeper library by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper)
+ * Single, no-dependencies binary file, based on a native Go ZooKeeper library 
+   by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper) ([LICENSE](https://github.com/outbrain/zookeepercli/blob/master/go-zookeeper-LICENSE))
 
 ### Download & Install
 
