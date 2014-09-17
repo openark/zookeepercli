@@ -17,7 +17,7 @@ There are [pre built binaries](https://github.com/outbrain/zookeepercli/releases
 You can find `RPM` and `deb` packages, as well as pre-compiled, dependency free `zookeepercli` executable binary.
 In fact, the only file installed by the pre-built `RPM` and `deb` packages is said executable binary file. 
 
-Otherwise the source code is freely available; you will need `git` installed as well as `go`, and you're on you own.
+Otherwise the source code is freely available; you will need `git` installed as well as `go`, and you're on your own.
 
   
 ### Usage:
