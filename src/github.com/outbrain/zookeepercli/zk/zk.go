@@ -18,7 +18,7 @@
 package zk
 
 import (
-	"github.com/outbrain/log"
+	"github.com/outbrain/golib/log"
 	"github.com/samuel/go-zookeeper/zk"
 	gopath "path"
 	"sort"

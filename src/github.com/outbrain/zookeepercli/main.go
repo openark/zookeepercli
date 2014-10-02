@@ -18,7 +18,7 @@ package main
 
 import (
 	"flag"
-	"github.com/outbrain/log"
+	"github.com/outbrain/golib/log"
 	"github.com/outbrain/zookeepercli/output"
 	"github.com/outbrain/zookeepercli/zk"
 	"strings"
