@@ -158,7 +158,7 @@ func Set(path string, data []byte) (*zk.Stat, error) {
 	}
 	defer connection.Close()
 
-	return connection.Set(path, data, 0)
+	return connection.Set(path, data, -1)
 }
 
 // Delete removes a path entry. It exits with error if the path does not exist, or has subdirectories.
