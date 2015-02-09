@@ -21,6 +21,8 @@ import (
 	"github.com/outbrain/golib/log"
 	"github.com/outbrain/zookeepercli/output"
 	"github.com/outbrain/zookeepercli/zk"
+	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -120,10 +122,17 @@ func main() {
 		}
 	case "set":
 		{
-			if len(flag.Args()) < 2 {
-				log.Fatal("Expected data argument")
+			var info []byte
+			if len(flag.Args()) > 1 {
+				info = []byte(flag.Arg(1))
+			} else {
+				var err error
+				info, err = ioutil.ReadAll(os.Stdin)
+				if err != nil {
+					log.Fatale(err)
+				}
 			}
-			if result, err := zk.Set(path, []byte(flag.Arg(1))); err == nil {
+			if result, err := zk.Set(path, info); err == nil {
 				log.Infof("Set %+v", result)
 			} else {
 				log.Fatale(err)
