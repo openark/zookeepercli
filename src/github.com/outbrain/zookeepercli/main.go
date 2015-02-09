@@ -64,7 +64,8 @@ func main() {
 		log.Fatal("Expected path argument")
 	}
 	path := flag.Arg(0)
-	if strings.HasSuffix(path, "/") {
+	if *command == "ls" {
+	} else if strings.HasSuffix(path, "/") {
 		log.Fatal("Path must not end with '/'")
 	}
 
