@@ -22,8 +22,10 @@ import (
 	"github.com/outbrain/zookeepercli/output"
 	"github.com/outbrain/zookeepercli/zk"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 // main is the application's entry point.
@@ -71,6 +73,7 @@ func main() {
 		log.Fatal("Path must not end with '/'")
 	}
 
+	rand.Seed(time.Now().UnixNano())
 	zk.SetServers(serversArray)
 
 	if *command == "creater" {
