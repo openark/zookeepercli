@@ -40,6 +40,7 @@ func main() {
 	stack := flag.Bool("stack", false, "add stack trace upon error")
 	authUser := flag.String("auth_usr", "", "optional, digest scheme, user")
 	authPwd := flag.String("auth_pwd", "", "optional, digest scheme, pwd")
+	acls := flag.String("acls", "31", "optional, csv list [1|,2|,4|,8|,16|,31]")
 	flag.Parse()
 
 	log.SetLevel(log.ERROR)
@@ -126,10 +127,22 @@ func main() {
 			if len(flag.Args()) < 2 {
 				log.Fatal("Expected data argument")
 			}
-			if result, err := zk.Create(path, []byte(flag.Arg(1)), *force); err == nil {
-				log.Infof("Created %+v", result)
+			if *authUser != "" && *authPwd != "" && *acls != "31" {
+				perms, err := zk.GetACL("digest", *authUser, *authPwd, *acls)
+				if err != nil {
+					log.Fatale(err)
+				}
+				if result, err := zk.CreateWithACL(path, []byte(flag.Arg(1)), *force, perms); err == nil {
+					log.Infof("Created %+v", result)
+				} else {
+					log.Fatale(err)
+				}
 			} else {
-				log.Fatale(err)
+				if result, err := zk.Create(path, []byte(flag.Arg(1)), *force); err == nil {
+					log.Infof("Created %+v", result)
+				} else {
+					log.Fatale(err)
+				}
 			}
 		}
 	case "set":
