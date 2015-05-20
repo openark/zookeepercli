@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/outbrain/golib/log"
 	"github.com/outbrain/zookeepercli/output"
 	"github.com/outbrain/zookeepercli/zk"
@@ -37,6 +38,8 @@ func main() {
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
 	stack := flag.Bool("stack", false, "add stack trace upon error")
+	authUser := flag.String("auth_usr", "", "optional, digest scheme, user")
+	authPwd := flag.String("auth_pwd", "", "optional, digest scheme, pwd")
 	flag.Parse()
 
 	log.SetLevel(log.ERROR)
@@ -75,6 +78,11 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	zk.SetServers(serversArray)
+
+	if *authUser != "" && *authPwd != "" {
+		authExp := fmt.Sprint(*authUser, ":", *authPwd)
+		zk.SetAuth("digest", []byte(authExp))
+	}
 
 	if *command == "creater" {
 		*command = "create"

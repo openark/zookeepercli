@@ -22,10 +22,14 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 	gopath "path"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 )
 
 var servers []string
+var authScheme string
+var authExpression []byte
 
 // We assume complete access to all
 var flags int32 = int32(0)
@@ -39,9 +43,20 @@ func SetServers(serversArray []string) {
 	servers = serversArray
 }
 
+func SetAuth(scheme string, auth []byte) {
+	log.Debug("Setting Auth ")
+	authScheme = scheme
+	authExpression = auth
+}
+
 // connect
 func connect() (*zk.Conn, error) {
 	conn, _, err := zk.Connect(servers, time.Second)
+	if err == nil && authScheme != "" {
+		log.Debugf("Add Auth %s %s", authScheme, authExpression)
+		err = conn.AddAuth(authScheme, authExpression)
+	}
+
 	return conn, err
 }
 
