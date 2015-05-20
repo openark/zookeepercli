@@ -127,7 +127,7 @@ func main() {
 			if len(flag.Args()) < 2 {
 				log.Fatal("Expected data argument")
 			}
-			if *authUser != "" && *authPwd != "" && *acls != "31" {
+			if *authUser != "" && *authPwd != "" {
 				perms, err := zk.GetACL("digest", *authUser, *authPwd, *acls)
 				if err != nil {
 					log.Fatale(err)
