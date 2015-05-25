@@ -24,6 +24,9 @@ Otherwise the source code is freely available; you will need `git` installed as 
 
     $ zookeepercli --help
     Usage of zookeepercli:
+      -acls="31": optional, csv list [1|,2|,4|,8|,16|,31]
+      -auth_pwd="": optional, digest scheme, pwd
+      -auth_usr="": optional, digest scheme, user
       -c="": command (exists|get|ls|lsr|create|creater|set|delete)
       -debug=false: debug mode (very verbose)
       -force=false: force operation
@@ -104,7 +107,12 @@ Otherwise the source code is freely available; you will need `git` installed as 
     child
     child/key1
     child/key2
+
+    # set value with read and write acl using digest authentication
+    $ zookeepercli --servers 192.168.59.103 --auth_usr "someuser" --auth_pwd "pass" --acls 1,2 -c create /secret4 value4
     
+    # get value using digest authentication
+    $ zookeepercli --servers 192.168.59.103 --auth_usr "someuser" --auth_pwd "pass" -c get /secret4
 
 The tool was built in order to allow with shell scripting seamless integration with ZooKeeper. 
 There is another, official command line tool for ZooKeeper that the author found inadequate 

@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/outbrain/golib/log"
 	"github.com/outbrain/zookeepercli/output"
 	"github.com/outbrain/zookeepercli/zk"
@@ -37,6 +38,9 @@ func main() {
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
 	stack := flag.Bool("stack", false, "add stack trace upon error")
+	authUser := flag.String("auth_usr", "", "optional, digest scheme, user")
+	authPwd := flag.String("auth_pwd", "", "optional, digest scheme, pwd")
+	acls := flag.String("acls", "31", "optional, csv list [1|,2|,4|,8|,16|,31]")
 	flag.Parse()
 
 	log.SetLevel(log.ERROR)
@@ -75,6 +79,11 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	zk.SetServers(serversArray)
+
+	if *authUser != "" && *authPwd != "" {
+		authExp := fmt.Sprint(*authUser, ":", *authPwd)
+		zk.SetAuth("digest", []byte(authExp))
+	}
 
 	if *command == "creater" {
 		*command = "create"
@@ -118,10 +127,22 @@ func main() {
 			if len(flag.Args()) < 2 {
 				log.Fatal("Expected data argument")
 			}
-			if result, err := zk.Create(path, []byte(flag.Arg(1)), *force); err == nil {
-				log.Infof("Created %+v", result)
+			if *authUser != "" && *authPwd != "" {
+				perms, err := zk.GetACL("digest", *authUser, *authPwd, *acls)
+				if err != nil {
+					log.Fatale(err)
+				}
+				if result, err := zk.CreateWithACL(path, []byte(flag.Arg(1)), *force, perms); err == nil {
+					log.Infof("Created %+v", result)
+				} else {
+					log.Fatale(err)
+				}
 			} else {
-				log.Fatale(err)
+				if result, err := zk.Create(path, []byte(flag.Arg(1)), *force); err == nil {
+					log.Infof("Created %+v", result)
+				} else {
+					log.Fatale(err)
+				}
 			}
 		}
 	case "set":

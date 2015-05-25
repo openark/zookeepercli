@@ -22,10 +22,14 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 	gopath "path"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 )
 
 var servers []string
+var authScheme string
+var authExpression []byte
 
 // We assume complete access to all
 var flags int32 = int32(0)
@@ -39,9 +43,34 @@ func SetServers(serversArray []string) {
 	servers = serversArray
 }
 
+func SetAuth(scheme string, auth []byte) {
+	log.Debug("Setting Auth ")
+	authScheme = scheme
+	authExpression = auth
+}
+
+// Returns acls
+func GetACL(authScheme string, user string, pwd string, acls string) (perms []zk.ACL, err error) {
+	aclsList := strings.Split(acls, ",")
+	for _, elem := range aclsList {
+		acl, err := strconv.ParseInt(elem, 10, 32)
+		if err != nil {
+			break
+		}
+		perm := zk.DigestACL(int32(acl), user, pwd)
+		perms = append(perms, perm[0])
+	}
+	return perms, err
+}
+
 // connect
 func connect() (*zk.Conn, error) {
 	conn, _, err := zk.Connect(servers, time.Second)
+	if err == nil && authScheme != "" {
+		log.Debugf("Add Auth %s %s", authScheme, authExpression)
+		err = conn.AddAuth(authScheme, authExpression)
+	}
+
 	return conn, err
 }
 
@@ -136,6 +165,26 @@ func createInternal(connection *zk.Conn, path string, data []byte, force bool) (
 	return "", nil
 }
 
+// createInternalWithACL: create a new path with acl
+func createInternalWithACL(connection *zk.Conn, path string, data []byte, force bool, perms []zk.ACL) (string, error) {
+	if path == "/" {
+		return "/", nil
+	}
+	log.Debugf("creating: %s with acl ", path)
+	attempts := 0
+	for {
+		attempts += 1
+		returnValue, err := connection.Create(path, data, flags, perms)
+		log.Debugf("create status for %s: %s, %+v", path, returnValue, err)
+		if err != nil && force && attempts < 2 {
+			returnValue, err = createInternalWithACL(connection, gopath.Dir(path), []byte("zookeepercli auto-generated"), force, perms)
+		} else {
+			return returnValue, err
+		}
+	}
+	return "", nil
+}
+
 // Create will create a new path, or exit with error should the path exist.
 // The "force" param controls the behavior when path's parent directory does not exist.
 // When "force" is false, the function returns with error/ When "force" is true, it recursively
@@ -148,6 +197,16 @@ func Create(path string, data []byte, force bool) (string, error) {
 	defer connection.Close()
 
 	return createInternal(connection, path, data, force)
+}
+
+func CreateWithACL(path string, data []byte, force bool, perms []zk.ACL) (string, error) {
+	connection, err := connect()
+	if err != nil {
+		return "", err
+	}
+	defer connection.Close()
+
+	return createInternalWithACL(connection, path, data, force, perms)
 }
 
 // Set updates a value for a given path, or returns with error if the path does not exist
