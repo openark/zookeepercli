@@ -230,3 +230,20 @@ func Delete(path string) error {
 
 	return connection.Delete(path, -1)
 }
+
+// Delete recursive if has subdirectories.
+func DeleteRecursive(path string) error {
+	result, err := ChildrenRecursive(path)
+	if err != nil {
+		log.Fatale(err)
+	}
+
+	for i := len(result) - 1; i >= 0; i-- {
+		znode := path + "/" + result[i]
+		if err = Delete(znode); err != nil {
+			log.Fatale(err)
+		}
+	}
+
+	return Delete(path)
+}
