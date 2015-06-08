@@ -32,7 +32,7 @@ import (
 // main is the application's entry point.
 func main() {
 	servers := flag.String("servers", "", "srv1[:port1][,srv2[:port2]...]")
-	command := flag.String("c", "", "command, required (exists|get|ls|lsr|create|creater|set|delete|rmr)")
+	command := flag.String("c", "", "command, required (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr)")
 	force := flag.Bool("force", false, "force operation")
 	format := flag.String("format", "txt", "output format (txt|json)")
 	verbose := flag.Bool("verbose", false, "verbose")
@@ -163,14 +163,17 @@ func main() {
 				log.Fatale(err)
 			}
 		}
-	case "delete":
+	case "delete", "rm":
 		{
 			if err := zk.Delete(path); err != nil {
 				log.Fatale(err)
 			}
 		}
-	case "rmr":
+	case "deleter", "rmr":
 		{
+			if !(*force) {
+				log.Fatal("deleter (recursive) command requires --force for safety measure")
+			}
 			if err := zk.DeleteRecursive(path); err != nil {
 				log.Fatale(err)
 			}
