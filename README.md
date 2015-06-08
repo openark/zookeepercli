@@ -5,8 +5,8 @@ Simple, lightweight, dependable CLI for ZooKeeper
 
 **zookeepercli** is a non-interactive command line client for [ZooKeeper](http://zookeeper.apache.org/). It provides with:
 
- * Basic CRUD-like operations: `create`, `set`, `delete`, `exists`, `get`, `ls` (aka `children`).
- * Extended operations: `lsr` (ls recursive), `creater` (create recursively)
+ * Basic CRUD-like operations: `create`, `set`, `delete` (aka `rm`), `exists`, `get`, `ls` (aka `children`).
+ * Extended operations: `lsr` (ls recursive), `creater` (create recursively), `deleter` (aka `rmr`, delete recursively)
  * Well formatted and controlled output: supporting either `txt` or `json` format
  * Single, no-dependencies binary file, based on a native Go ZooKeeper library 
    by [github.com/samuel/go-zookeeper](http://github.com/samuel/go-zookeeper) ([LICENSE](https://github.com/outbrain/zookeepercli/blob/master/go-zookeeper-LICENSE))
@@ -27,7 +27,7 @@ Otherwise the source code is freely available; you will need `git` installed as 
       -acls="31": optional, csv list [1|,2|,4|,8|,16|,31]
       -auth_pwd="": optional, digest scheme, pwd
       -auth_usr="": optional, digest scheme, user
-      -c="": command (exists|get|ls|lsr|create|creater|set|delete)
+      -c="": command (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr)
       -debug=false: debug mode (very verbose)
       -force=false: force operation
       -format="txt": output format (txt|json)
