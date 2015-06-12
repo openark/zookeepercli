@@ -32,7 +32,7 @@ import (
 // main is the application's entry point.
 func main() {
 	servers := flag.String("servers", "", "srv1[:port1][,srv2[:port2]...]")
-	command := flag.String("c", "", "command, required (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr)")
+	command := flag.String("c", "", "command, required (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr|getacl|setacl)")
 	force := flag.Bool("force", false, "force operation")
 	format := flag.String("format", "txt", "output format (txt|json)")
 	verbose := flag.Bool("verbose", false, "verbose")
@@ -65,7 +65,7 @@ func main() {
 	}
 
 	if len(*command) == 0 {
-		log.Fatal("Expected command (-c) (exists|get|ls|lsr|create|creater|set|delete)")
+		log.Fatal("Expected command (-c) (exists|get|ls|lsr|create|creater|set|delete|getacl|setacl)")
 	}
 
 	if len(flag.Args()) < 1 {
@@ -106,6 +106,14 @@ func main() {
 				log.Fatale(err)
 			}
 		}
+	case "getacl":
+		{
+			if result, err := zk.GetACL(path); err == nil {
+				output.PrintStringArray(result, *format)
+			} else {
+				log.Fatale(err)
+			}
+		}
 	case "ls":
 		{
 			if result, err := zk.Children(path); err == nil {
@@ -128,7 +136,7 @@ func main() {
 				log.Fatal("Expected data argument")
 			}
 			if *authUser != "" && *authPwd != "" {
-				perms, err := zk.GetACL("digest", *authUser, *authPwd, *acls)
+				perms, err := zk.BuildACL("digest", *authUser, *authPwd, *acls)
 				if err != nil {
 					log.Fatale(err)
 				}
@@ -158,6 +166,25 @@ func main() {
 				}
 			}
 			if result, err := zk.Set(path, info); err == nil {
+				log.Infof("Set %+v", result)
+			} else {
+				log.Fatale(err)
+			}
+		}
+	case "setacl":
+		{
+			var aclstr string
+			if len(flag.Args()) > 1 {
+				aclstr = flag.Arg(1)
+			} else {
+				var err error
+				data, err := ioutil.ReadAll(os.Stdin)
+				aclstr = string(data)
+				if err != nil {
+					log.Fatale(err)
+				}
+			}
+			if result, err := zk.SetACL(path, aclstr); err == nil {
 				log.Infof("Set %+v", result)
 			} else {
 				log.Fatale(err)

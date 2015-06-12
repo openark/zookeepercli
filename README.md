@@ -27,7 +27,7 @@ Otherwise the source code is freely available; you will need `git` installed as 
       -acls="31": optional, csv list [1|,2|,4|,8|,16|,31]
       -auth_pwd="": optional, digest scheme, pwd
       -auth_usr="": optional, digest scheme, user
-      -c="": command (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr)
+      -c="": command (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr|getacl|setacl)
       -debug=false: debug mode (very verbose)
       -force=false: force operation
       -format="txt": output format (txt|json)
@@ -113,6 +113,17 @@ Otherwise the source code is freely available; you will need `git` installed as 
     
     # get value using digest authentication
     $ zookeepercli --servers 192.168.59.103 --auth_usr "someuser" --auth_pwd "pass" -c get /secret4
+
+    # view the current acl on a path
+    $ zookeepercli --servers srv-1,srv-2,srv-3 -c create /demo_acl "some value"
+    $ zookeepercli --servers srv-1,srv-2,srv-3 -c getacl /demo_acl
+    world:anyone:cdrwa
+
+    # set an acl with world and digest authentication
+    $ zookeepercli --servers srv-1,srv-2,srv-3 -c setacl /demo_acl "world:anyone:rw,digest:someuser:hashedpw:crdwa"
+    $ zookeepercli --servers srv-1,srv-2,srv-3 -c getacl /demo_acl
+    world:anyone:rw
+    digest:someuser:hashedpw:cdrwa
 
 The tool was built in order to allow with shell scripting seamless integration with ZooKeeper. 
 There is another, official command line tool for ZooKeeper that the author found inadequate 

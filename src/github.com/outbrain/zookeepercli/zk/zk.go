@@ -18,8 +18,12 @@
 package zk
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"github.com/outbrain/golib/log"
 	"github.com/samuel/go-zookeeper/zk"
+	"math"
 	gopath "path"
 	"sort"
 	"strconv"
@@ -50,7 +54,7 @@ func SetAuth(scheme string, auth []byte) {
 }
 
 // Returns acls
-func GetACL(authScheme string, user string, pwd string, acls string) (perms []zk.ACL, err error) {
+func BuildACL(authScheme string, user string, pwd string, acls string) (perms []zk.ACL, err error) {
 	aclsList := strings.Split(acls, ",")
 	for _, elem := range aclsList {
 		acl, err := strconv.ParseInt(elem, 10, 32)
@@ -96,6 +100,43 @@ func Get(path string) ([]byte, error) {
 
 	data, _, err := connection.Get(path)
 	return data, err
+}
+
+func GetACL(path string) (data []string, err error) {
+	connection, err := connect()
+	if err != nil {
+		return nil, err
+	}
+	defer connection.Close()
+
+	perms, _, err := connection.GetACL(path)
+	return aclsToString(perms), err
+}
+
+func aclsToString(acls []zk.ACL) (result []string) {
+	for _, acl := range acls {
+		var buffer bytes.Buffer
+
+		buffer.WriteString(fmt.Sprintf("%v:%v:", acl.Scheme, acl.ID))
+
+		if acl.Perms&zk.PermCreate != 0 {
+			buffer.WriteString("c")
+		}
+		if acl.Perms&zk.PermDelete != 0 {
+			buffer.WriteString("d")
+		}
+		if acl.Perms&zk.PermRead != 0 {
+			buffer.WriteString("r")
+		}
+		if acl.Perms&zk.PermWrite != 0 {
+			buffer.WriteString("w")
+		}
+		if acl.Perms&zk.PermAdmin != 0 {
+			buffer.WriteString("a")
+		}
+		result = append(result, buffer.String())
+	}
+	return result
 }
 
 // Children returns sub-paths of given path, optionally empty array, or error if path does not exist
@@ -218,6 +259,78 @@ func Set(path string, data []byte) (*zk.Stat, error) {
 	defer connection.Close()
 
 	return connection.Set(path, data, -1)
+}
+
+// updates the ACL on a given path
+func SetACL(path string, aclstr string) (*zk.Stat, error) {
+	connection, err := connect()
+	if err != nil {
+		return nil, err
+	}
+	defer connection.Close()
+
+	acl, err := parseACLString(aclstr)
+	if err != nil {
+		return nil, err
+	}
+
+	return connection.SetACL(path, acl, -1)
+}
+
+func parseACLString(aclstr string) (acl []zk.ACL, err error) {
+	aclsList := strings.Split(aclstr, ",")
+	for _, entry := range aclsList {
+		parts := strings.Split(entry, ":")
+		var scheme, id string
+		var perms int32
+		if len(parts) > 3 && parts[0] == "digest" {
+			scheme = parts[0]
+			id = fmt.Sprintf("%s:%s", parts[1], parts[2])
+			perms, err = parsePermsString(parts[3])
+		} else {
+			scheme, id = parts[0], parts[1]
+			perms, err = parsePermsString(parts[2])
+		}
+
+		if err == nil {
+			perm := zk.ACL{Scheme: scheme, ID: id, Perms: perms}
+			acl = append(acl, perm)
+		}
+	}
+	return acl, err
+}
+
+func parsePermsString(permstr string) (perms int32, err error) {
+	if x, e := strconv.ParseFloat(permstr, 64); e == nil {
+		perms = int32(math.Min(x, 31))
+	} else {
+		for _, rune := range strings.Split(permstr, "") {
+			switch rune {
+			case "r":
+				perms |= zk.PermRead
+				break
+			case "w":
+				perms |= zk.PermWrite
+				break
+			case "c":
+				perms |= zk.PermCreate
+				break
+			case "d":
+				perms |= zk.PermDelete
+				break
+			case "a":
+				perms |= zk.PermAdmin
+				break
+			default:
+				err = errors.New("invalid ACL string specified")
+			}
+
+			if err != nil {
+				break
+			}
+		}
+	}
+	return perms, err
 }
 
 // Delete removes a path entry. It exits with error if the path does not exist, or has subdirectories.
