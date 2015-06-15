@@ -114,6 +114,9 @@ Otherwise the source code is freely available; you will need `git` installed as 
     # get value using digest authentication
     $ zookeepercli --servers 192.168.59.103 --auth_usr "someuser" --auth_pwd "pass" -c get /secret4
 
+    # create a value with custom acls
+    $ zookeepercli --servers 192.168.59.103 -c create /secret5 value5 world:anyone:rw,digest:someuser:hashedpw:crdwa
+
     # view the current acl on a path
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c create /demo_acl "some value"
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c getacl /demo_acl
@@ -124,6 +127,9 @@ Otherwise the source code is freely available; you will need `git` installed as 
     $ zookeepercli --servers srv-1,srv-2,srv-3 -c getacl /demo_acl
     world:anyone:rw
     digest:someuser:hashedpw:cdrwa
+
+    # set an acl with world and digest authentication creating the node if it doesn't exist
+    $ zookeepercli --servers srv-1,srv-2,srv-3 -force -c setacl /demo_acl_create "world:anyone:rw,digest:someuser:hashedpw:crdwa"
 
 The tool was built in order to allow with shell scripting seamless integration with ZooKeeper. 
 There is another, official command line tool for ZooKeeper that the author found inadequate 

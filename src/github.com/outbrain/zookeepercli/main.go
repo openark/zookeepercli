@@ -132,9 +132,16 @@ func main() {
 		}
 	case "create":
 		{
+			var aclstr string
+
 			if len(flag.Args()) < 2 {
 				log.Fatal("Expected data argument")
 			}
+
+			if len(flag.Args()) >= 3 {
+				aclstr = flag.Arg(2)
+			}
+
 			if *authUser != "" && *authPwd != "" {
 				perms, err := zk.BuildACL("digest", *authUser, *authPwd, *acls)
 				if err != nil {
@@ -146,7 +153,7 @@ func main() {
 					log.Fatale(err)
 				}
 			} else {
-				if result, err := zk.Create(path, []byte(flag.Arg(1)), *force); err == nil {
+				if result, err := zk.Create(path, []byte(flag.Arg(1)), aclstr, *force); err == nil {
 					log.Infof("Created %+v", result)
 				} else {
 					log.Fatale(err)
@@ -184,7 +191,7 @@ func main() {
 					log.Fatale(err)
 				}
 			}
-			if result, err := zk.SetACL(path, aclstr); err == nil {
+			if result, err := zk.SetACL(path, aclstr, *force); err == nil {
 				log.Infof("Set %+v", result)
 			} else {
 				log.Fatale(err)
