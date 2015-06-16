@@ -65,7 +65,7 @@ func main() {
 	}
 
 	if len(*command) == 0 {
-		log.Fatal("Expected command (-c) (exists|get|ls|lsr|create|creater|set|delete|getacl|setacl)")
+		log.Fatal("Expected command (-c) (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr|getacl|setacl)")
 	}
 
 	if len(flag.Args()) < 1 {
