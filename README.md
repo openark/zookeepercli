@@ -120,6 +120,21 @@ in terms of output format and output control, as well as large footprint.
 **zookeepercli** overcomes those limitations and provides with quick, well formatted output as well as
 enhanced functionality. 
 
+### Docker
+
+You can also build and run **zookeepercli** in a Docker container. To build the image:
+
+    $ docker build -t zookeepercli .
+
+Now, you can run **zookeepercli** from a container. Examples:
+
+    $ docker run --rm -it zookeepercli --servers $ZK_SERVERS -c create /docker_demo "test value"
+    $ docker run --rm -it zookeepercli --servers $ZK_SERVERS -c get /docker_demo
+    test value
+    $ docker run --rm -it zookeepercli --servers $ZK_SERVERS -c ls /
+    docker_demo
+    zookeeper
+
 ### License
 
 Release under the [Apache 2.0 license](https://github.com/outbrain/zookeepercli/blob/master/LICENSE)
