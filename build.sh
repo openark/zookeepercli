@@ -31,6 +31,7 @@ if [ "$platform" = "Linux" ]; then
   # rpm packaging
   fpm -v "${release_version}" -f -s dir -t rpm -n zookeepercli -C $release_dir --prefix=/usr/bin .
   fpm -v "${release_version}" -f -s dir -t deb -n zookeepercli -C $release_dir --prefix=/usr/bin .
+  popd
 fi
 
 echo "---"
