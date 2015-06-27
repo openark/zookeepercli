@@ -187,10 +187,11 @@ func ChildrenRecursive(path string) ([]string, error) {
 }
 
 // createInternal: create a new path
-func createInternal(connection *zk.Conn, path string, data []byte, force bool) (string, error) {
+func createInternal(connection *zk.Conn, path string, data []byte, acl []zk.ACL, force bool) (string, error) {
 	if path == "/" {
 		return "/", nil
 	}
+
 	log.Debugf("creating: %s", path)
 	attempts := 0
 	for {
@@ -198,7 +199,7 @@ func createInternal(connection *zk.Conn, path string, data []byte, force bool) (
 		returnValue, err := connection.Create(path, data, flags, acl)
 		log.Debugf("create status for %s: %s, %+v", path, returnValue, err)
 		if err != nil && force && attempts < 2 {
-			returnValue, err = createInternal(connection, gopath.Dir(path), []byte("zookeepercli auto-generated"), force)
+			returnValue, err = createInternal(connection, gopath.Dir(path), []byte("zookeepercli auto-generated"), acl, force)
 		} else {
 			return returnValue, err
 		}
@@ -230,14 +231,21 @@ func createInternalWithACL(connection *zk.Conn, path string, data []byte, force 
 // The "force" param controls the behavior when path's parent directory does not exist.
 // When "force" is false, the function returns with error/ When "force" is true, it recursively
 // attempts to create required parent directories.
-func Create(path string, data []byte, force bool) (string, error) {
+func Create(path string, data []byte, aclstr string, force bool) (string, error) {
 	connection, err := connect()
 	if err != nil {
 		return "", err
 	}
 	defer connection.Close()
 
-	return createInternal(connection, path, data, force)
+	if len(aclstr) > 0 {
+		acl, err = parseACLString(aclstr)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return createInternal(connection, path, data, acl, force)
 }
 
 func CreateWithACL(path string, data []byte, force bool, perms []zk.ACL) (string, error) {
@@ -262,19 +270,31 @@ func Set(path string, data []byte) (*zk.Stat, error) {
 }
 
 // updates the ACL on a given path
-func SetACL(path string, aclstr string) (*zk.Stat, error) {
+func SetACL(path string, aclstr string, force bool) (string, error) {
 	connection, err := connect()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer connection.Close()
 
 	acl, err := parseACLString(aclstr)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return connection.SetACL(path, acl, -1)
+	if force {
+		exists, _, err := connection.Exists(path)
+		if err != nil {
+			return "", err
+		}
+
+		if !exists {
+			return createInternal(connection, path, []byte(""), acl, force)
+		}
+	}
+
+	_, err = connection.SetACL(path, acl, -1)
+	return path, err
 }
 
 func parseACLString(aclstr string) (acl []zk.ACL, err error) {
