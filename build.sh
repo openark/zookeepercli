@@ -5,7 +5,7 @@
 # Requires fpm: https://github.com/jordansissel/fpm
 #
 
-release_version="1.0.9"
+release_version="1.0.10"
 release_dir=/tmp/zookeepercli
 rm -rf $release_dir/*
 mkdir -p $release_dir
