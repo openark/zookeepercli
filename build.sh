@@ -17,8 +17,8 @@ find . -name "*.go" -exec go fmt {} \;
 GOPATH="$(pwd)"
 printf '%s\n' "getting github.com/outbrain/golib/log"
 go get github.com/outbrain/golib/log
-printf '%s\n' "getting github.com/outbrain/zookeepercli/zk"
-go get github.com/outbrain/zookeepercli/zk
+printf '%s\n' "getting github.com/samuel/go-zookeeper/zk"
+go get github.com/samuel/go-zookeeper/zk
 printf '%s\n' "building ./src/github.com/outbrain/zookeepercli/main.go"
 go build -o $release_dir/zookeepercli ./src/github.com/outbrain/zookeepercli/main.go
 
