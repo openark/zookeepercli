@@ -23,34 +23,36 @@ import (
 	"strings"
 )
 
-// PrintString prints a single string to standard output, in either plaintext format or JSON format
-func PrintString(data []byte, formatType string) {
+type Printer interface {
+	PrintString(data []byte)
+	PrintStringArray(array []string)
+}
 
-	switch formatType {
-	case "txt":
-		{
-			fmt.Println(fmt.Sprintf("%s", data))
-		}
-	case "json":
-		{
-			s, _ := json.Marshal(string(data))
-			fmt.Println(string(s))
-		}
+type TxtPrinter struct {
+	OmitTrailingNL bool
+}
+
+func (p TxtPrinter) PrintString(data []byte) {
+	s := fmt.Sprintf("%s", data)
+	if p.OmitTrailingNL {
+		fmt.Print(s)
+	} else {
+		fmt.Println(s)
 	}
 }
 
-// PrintString prints a string array to standard output, in either plaintext format (one string per row) or JSON format
-func PrintStringArray(stringArray []string, formatType string) {
+func (p TxtPrinter) PrintStringArray(stringArray []string) {
+	fmt.Println(strings.Join(stringArray, "\n"))
+}
 
-	switch formatType {
-	case "txt":
-		{
-			fmt.Println(strings.Join(stringArray, "\n"))
-		}
-	case "json":
-		{
-			s, _ := json.Marshal(stringArray)
-			fmt.Println(string(s))
-		}
-	}
+type JSONPrinter struct{}
+
+func (_ JSONPrinter) PrintString(data []byte) {
+	s, _ := json.Marshal(string(data))
+	fmt.Println(string(s))
+}
+
+func (_ JSONPrinter) PrintStringArray(stringArray []string) {
+	s, _ := json.Marshal(stringArray)
+	fmt.Println(string(s))
 }
