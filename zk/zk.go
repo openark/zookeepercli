@@ -67,8 +67,15 @@ func BuildACL(authScheme string, user string, pwd string, acls string) (perms []
 	return perms, err
 }
 
+type infoLogger struct{}
+
+func (_ infoLogger) Printf(format string, a ...interface{}) {
+	log.Infof(format, a...)
+}
+
 // connect
 func connect() (*zk.Conn, error) {
+	zk.DefaultLogger = &infoLogger{}
 	conn, _, err := zk.Connect(servers, time.Second)
 	if err == nil && authScheme != "" {
 		log.Debugf("Add Auth %s %s", authScheme, authExpression)
