@@ -35,6 +35,7 @@ func main() {
 	command := flag.String("c", "", "command, required (exists|get|ls|lsr|create|creater|set|delete|rm|deleter|rmr|getacl|setacl)")
 	force := flag.Bool("force", false, "force operation")
 	format := flag.String("format", "txt", "output format (txt|json)")
+	omitNewline := flag.Bool("n", false, "omit trailing newline with get in txt format")
 	verbose := flag.Bool("verbose", false, "verbose")
 	debug := flag.Bool("debug", false, "debug mode (very verbose)")
 	stack := flag.Bool("stack", false, "add stack trace upon error")
@@ -52,6 +53,19 @@ func main() {
 	}
 	if *stack {
 		log.SetPrintStackTrace(*stack)
+	}
+
+	if *omitNewline && *format != "txt" {
+		log.Fatalf("-n only valid for -format=txt")
+	}
+	var out output.Printer
+	switch *format {
+	case "txt":
+		out = &output.TxtPrinter{*omitNewline}
+	case "json":
+		out = &output.JSONPrinter{}
+	default:
+		log.Fatalf("Unknown output type %q", *format)
 	}
 
 	log.Info("starting")
@@ -93,7 +107,7 @@ func main() {
 	case "exists":
 		{
 			if exists, err := zk.Exists(path); err == nil && exists {
-				output.PrintString([]byte("true"), *format)
+				out.PrintString([]byte("true"))
 			} else {
 				log.Fatale(err)
 			}
@@ -101,7 +115,7 @@ func main() {
 	case "get":
 		{
 			if result, err := zk.Get(path); err == nil {
-				output.PrintString(result, *format)
+				out.PrintString(result)
 			} else {
 				log.Fatale(err)
 			}
@@ -109,7 +123,7 @@ func main() {
 	case "getacl":
 		{
 			if result, err := zk.GetACL(path); err == nil {
-				output.PrintStringArray(result, *format)
+				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
 			}
@@ -117,7 +131,7 @@ func main() {
 	case "ls":
 		{
 			if result, err := zk.Children(path); err == nil {
-				output.PrintStringArray(result, *format)
+				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
 			}
@@ -125,7 +139,7 @@ func main() {
 	case "lsr":
 		{
 			if result, err := zk.ChildrenRecursive(path); err == nil {
-				output.PrintStringArray(result, *format)
+				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
 			}
