@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/bash -e
+
+set -o pipefail
 
 # Simple packaging of zookeepercli
 #
@@ -15,6 +17,7 @@ pushd "$(dirname "$0")"
 find . -name "*.go" -exec go fmt {} \;
 
 GOPATH="$(pwd)"
+export GOPATH
 printf '%s\n' "getting github.com/outbrain/golib/log"
 go get github.com/outbrain/golib/log
 printf '%s\n' "getting github.com/samuel/go-zookeeper/zk"
