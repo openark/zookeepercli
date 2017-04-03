@@ -1,5 +1,6 @@
-zookeepercli
-============
+# zookeepercli
+
+[![downloads](https://img.shields.io/github/downloads/outbrain/zookeepercli/total.svg)](https://github.com/outbrain/zookeepercli/releases) 
 
 Simple, lightweight, dependable CLI for ZooKeeper
 
