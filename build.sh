@@ -16,8 +16,6 @@ mkdir -p $release_dir
 pushd "$(dirname "$0")"
 for f in $(find . -name "*.go"); do go fmt $f; done
 
-go get github.com/outbrain/golib/log || exit 1
-go get github.com/samuel/go-zookeeper/zk || exit 1
 go build -o $release_dir/zookeepercli || exit 1
 
 if [ "$platform" = "Linux" ]; then
