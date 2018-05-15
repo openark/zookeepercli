@@ -92,11 +92,12 @@ func main() {
 	}
 
 	rand.Seed(time.Now().UnixNano())
-	zk.SetServers(serversArray)
+	zook := zk.NewZooKeeper()
+	zook.SetServers(serversArray)
 
 	if *authUser != "" && *authPwd != "" {
 		authExp := fmt.Sprint(*authUser, ":", *authPwd)
-		zk.SetAuth("digest", []byte(authExp))
+		zook.SetAuth("digest", []byte(authExp))
 	}
 
 	if *command == "creater" {
@@ -106,7 +107,7 @@ func main() {
 	switch *command {
 	case "exists":
 		{
-			if exists, err := zk.Exists(path); err == nil && exists {
+			if exists, err := zook.Exists(path); err == nil && exists {
 				out.PrintString([]byte("true"))
 			} else {
 				log.Fatale(err)
@@ -114,7 +115,7 @@ func main() {
 		}
 	case "get":
 		{
-			if result, err := zk.Get(path); err == nil {
+			if result, err := zook.Get(path); err == nil {
 				out.PrintString(result)
 			} else {
 				log.Fatale(err)
@@ -122,7 +123,7 @@ func main() {
 		}
 	case "getacl":
 		{
-			if result, err := zk.GetACL(path); err == nil {
+			if result, err := zook.GetACL(path); err == nil {
 				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
@@ -130,7 +131,7 @@ func main() {
 		}
 	case "ls":
 		{
-			if result, err := zk.Children(path); err == nil {
+			if result, err := zook.Children(path); err == nil {
 				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
@@ -138,7 +139,7 @@ func main() {
 		}
 	case "lsr":
 		{
-			if result, err := zk.ChildrenRecursive(path); err == nil {
+			if result, err := zook.ChildrenRecursive(path); err == nil {
 				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
@@ -157,17 +158,17 @@ func main() {
 			}
 
 			if *authUser != "" && *authPwd != "" {
-				perms, err := zk.BuildACL("digest", *authUser, *authPwd, *acls)
+				perms, err := zook.BuildACL("digest", *authUser, *authPwd, *acls)
 				if err != nil {
 					log.Fatale(err)
 				}
-				if result, err := zk.CreateWithACL(path, []byte(flag.Arg(1)), *force, perms); err == nil {
+				if result, err := zook.CreateWithACL(path, []byte(flag.Arg(1)), *force, perms); err == nil {
 					log.Infof("Created %+v", result)
 				} else {
 					log.Fatale(err)
 				}
 			} else {
-				if result, err := zk.Create(path, []byte(flag.Arg(1)), aclstr, *force); err == nil {
+				if result, err := zook.Create(path, []byte(flag.Arg(1)), aclstr, *force); err == nil {
 					log.Infof("Created %+v", result)
 				} else {
 					log.Fatale(err)
@@ -186,7 +187,7 @@ func main() {
 					log.Fatale(err)
 				}
 			}
-			if result, err := zk.Set(path, info); err == nil {
+			if result, err := zook.Set(path, info); err == nil {
 				log.Infof("Set %+v", result)
 			} else {
 				log.Fatale(err)
@@ -205,7 +206,7 @@ func main() {
 					log.Fatale(err)
 				}
 			}
-			if result, err := zk.SetACL(path, aclstr, *force); err == nil {
+			if result, err := zook.SetACL(path, aclstr, *force); err == nil {
 				log.Infof("Set %+v", result)
 			} else {
 				log.Fatale(err)
@@ -213,7 +214,7 @@ func main() {
 		}
 	case "delete", "rm":
 		{
-			if err := zk.Delete(path); err != nil {
+			if err := zook.Delete(path); err != nil {
 				log.Fatale(err)
 			}
 		}
@@ -222,7 +223,7 @@ func main() {
 			if !(*force) {
 				log.Fatal("deleter (recursive) command requires --force for safety measure")
 			}
-			if err := zk.DeleteRecursive(path); err != nil {
+			if err := zook.DeleteRecursive(path); err != nil {
 				log.Fatale(err)
 			}
 		}
