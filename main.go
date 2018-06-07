@@ -133,7 +133,9 @@ func main() {
 	case "ls":
 		{
 			if result, err := zook.Children(path); err == nil {
-				sort.Strings(result)
+				if *format == "txt" {
+					sort.Strings(result)
+				}
 				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
@@ -142,7 +144,9 @@ func main() {
 	case "lsr":
 		{
 			if result, err := zook.ChildrenRecursive(path); err == nil {
-				sort.Strings(result)
+				if *format == "txt" {
+					sort.Strings(result)
+				}
 				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
