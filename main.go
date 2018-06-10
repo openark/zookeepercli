@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -132,6 +133,9 @@ func main() {
 	case "ls":
 		{
 			if result, err := zook.Children(path); err == nil {
+				if *format == "txt" {
+					sort.Strings(result)
+				}
 				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
@@ -140,6 +144,9 @@ func main() {
 	case "lsr":
 		{
 			if result, err := zook.ChildrenRecursive(path); err == nil {
+				if *format == "txt" {
+					sort.Strings(result)
+				}
 				out.PrintStringArray(result)
 			} else {
 				log.Fatale(err)
