@@ -87,9 +87,13 @@ func main() {
 		log.Fatal("Expected path argument")
 	}
 	path := flag.Arg(0)
-	if *command == "ls" {
-	} else if strings.HasSuffix(path, "/") {
-		log.Fatal("Path must not end with '/'")
+
+	if strings.HasSuffix(path, "/") {
+		if (*command == "ls" || *command == "lsr") && path == "/" {
+			// ls'ing on / is fine.  Do nothing
+		} else {
+			log.Fatal("Path must not end with '/'")
+		}
 	}
 
 	rand.Seed(time.Now().UnixNano())
