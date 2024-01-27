@@ -19,16 +19,19 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/outbrain/golib/log"
-	"github.com/outbrain/zookeepercli/output"
-	"github.com/outbrain/zookeepercli/zk"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/openark/zookeepercli/output"
+	"github.com/openark/zookeepercli/zk"
+	"github.com/outbrain/golib/log"
 )
+
+var Version = "undefined-dev-version"
 
 // main is the application's entry point.
 func main() {
@@ -43,7 +46,13 @@ func main() {
 	authUser := flag.String("auth_usr", "", "optional, digest scheme, user")
 	authPwd := flag.String("auth_pwd", "", "optional, digest scheme, pwd")
 	acls := flag.String("acls", "31", "optional, csv list [1|,2|,4|,8|,16|,31]")
+	version := flag.Bool("version", false, "print version and exit")
 	flag.Parse()
+
+	if *version {
+		fmt.Println("zookeepercli version:", Version)
+		os.Exit(0)
+	}
 
 	log.SetLevel(log.ERROR)
 	if *verbose {
